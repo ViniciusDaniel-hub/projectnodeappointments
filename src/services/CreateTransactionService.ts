@@ -1,16 +1,34 @@
 import TransactionsRepository from '../repositories/TransactionsRepository';
 import Transaction from '../models/Transaction';
 
+interface Request {
+  title: string,
+  value: number,
+  type: "income" | "outcome"  
+};
+
 class CreateTransactionService {
-  private transactionsRepository: TransactionsRepository;
+  private transactionRepository: TransactionsRepository;
 
-  constructor(transactionsRepository: TransactionsRepository) {
-    this.transactionsRepository = transactionsRepository;
+  constructor(transactionsRepository : TransactionsRepository) {
+    this.transactionRepository = transactionsRepository;
   }
 
-  public execute(): Transaction {
-    // TODO
-  }
-}
+  
 
-export default CreateTransactionService;
+  public execute({title, value, type}: Request): Transaction {
+    const { total } = this.transactionRepository.getBalance();
+    if(type === 'outcome' && total < value ) {
+      throw new Error('Saldo insuficiente.');
+    }
+    const transaction = this.transactionRepository.create({
+      title,
+      value,
+      type,
+    });
+    return transaction;
+  };
+};
+
+  export default CreateTransactionService; 
+
